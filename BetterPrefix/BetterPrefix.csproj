@@ -1,55 +1,59 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{5FA4FBA2-4F58-4558-9441-E0CF8131446F}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>BetterPrefix</RootNamespace>
-        <AssemblyName>BetterPrefix</AssemblyName>
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-        <OutputPath>..\..\..\..\..\GOG Games\Terraria\Mods\BetterPrefix\</OutputPath>
-        <Optimize>true</Optimize>
-        <PlatformTarget>x86</PlatformTarget>
-        <LangVersion>7.3</LangVersion>
-        <ErrorReport>prompt</ErrorReport>
-    </PropertyGroup>
-    <ItemGroup>
-        <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
-        <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
-        <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
-        <Reference Include="ReLogic" HintPath = "..\..\dll\ReLogic.dll" Private ="False"/>
-        <Reference Include="Terraria" HintPath = "..\..\dll\Terraria.exe" Private ="False"/>
-        <Reference Include="tContentPatch" HintPath="..\..\dll\tContentPatch.dll" Private="False"/>
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Net.Http" />
-        <Reference Include="System.Xml" />
-
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="BetterPrefixMod.cs" />
-        <Compile Include="setting\MaxAttemptsSetting.cs" />
-        <Compile Include="setting\PresetPrefixesSetting.cs" />
-        <Compile Include="UIBetterPrefix.cs" />
-        <Compile Include="Setting.cs" />
-        <Compile Include="ModQuickButton.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="Resource\info.json" />
-        <None Include="Resource\loadConfig.json" />
-        <Content Include="Resource\ico.png" />
-    </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5FA4FBA2-4F58-4558-9441-E0CF8131446F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BetterPrefix</RootNamespace>
+    <AssemblyName>BetterPrefix</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>$(modDir)BetterPrefix\</OutputPath>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
+    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
+    <Reference Include="ReLogic" HintPath="$(dllDir)\ReLogic.dll" Private="False" />
+    <Reference Include="Terraria" HintPath="$(dllDir)\Terraria.exe" Private="False" />
+    <Reference Include="tContentPatch" HintPath="$(dllDir)\tContentPatch.dll" Private="False" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BetterPrefixMod.cs" />
+    <Compile Include="setting\MaxAttemptsSetting.cs" />
+    <Compile Include="setting\PresetPrefixesSetting.cs" />
+    <Compile Include="UIBetterPrefix.cs" />
+    <Compile Include="Setting.cs" />
+    <Compile Include="ModQuickButton.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resource\info.json" />
+    <None Include="Resource\loadConfig.json" />
+    <Content Include="Resource\ico.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties resource_4info_1json__JsonSchema="1" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

@@ -2,12 +2,10 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using tContentPatch.Content.UI;
 using Terraria;
 using Terraria.GameContent.UI;
 using Terraria.GameContent.UI.Elements;
-using Terraria.ID;
 using Terraria.UI;
 
 namespace BetterPrefix
@@ -17,14 +15,16 @@ namespace BetterPrefix
         private Item _targetItem = new Item();
         private UIItemSlot _itemSlot;
         private UIText _itemNameText;
+        private UIText _prefixText;
+        private UIText _statusText;
         private UIButton1 _resetButton;
-        private UIButton1 _reforgeButton;
-        private UIPanel _presetPanel;
+        private UIButton1 _randomButton;
+        private UIButton1 _perfectButton;
+        private UIScrollViewer _presetScrollViewer;
         private UIWrapPanel _presetWrapPanel;
         private bool _isBest = false;
 
         private int _reforgeCooldown = 0;
-        private bool _reforgeButtonEnabled = true;
 
         private List<int> _presetPrefixIds;
 
@@ -34,6 +34,8 @@ namespace BetterPrefix
         {
             HAlign = 0f;
             VAlign = 0.5f;
+            MinWidth.Pixels = 420;
+            MinHeight.Pixels = 340;
 
             // 读取设置值
             _presetPrefixIds = PresetPrefixesSetting.CurrentPresetIds ?? new List<int> { 65, 72, 81, 82, 83, 84, 85 };
@@ -45,102 +47,131 @@ namespace BetterPrefix
 
         private void BuildUI()
         {
-            // 顶部面板：物品槽
+            // 顶部面板：物品槽 + 物品信息
             var panelTop = new UIPanel();
             panelTop.Width.Set(0, 1f);
-            panelTop.Height.Set(60, 0);
+            panelTop.Height.Set(64, 0);
             panelTop.SetPadding(5);
             Child.Append(panelTop);
 
             _itemSlot = new UIItemSlot();
             _itemSlot.Width.Set(52, 0);
             _itemSlot.Height.Set(52, 0);
-            _itemSlot.Left.Set(5, 0);
-            _itemSlot.Top.Set(5, 0);
+            _itemSlot.Left.Set(4, 0);
+            _itemSlot.Top.Set(2, 0);
             _itemSlot.OnItemChanged += OnItemChanged;
             panelTop.Append(_itemSlot);
 
             _itemNameText = new UIText("未选择物品");
-            _itemNameText.Left.Set(65, 0);
-            _itemNameText.Top.Set(20, 0);
+            _itemNameText.Left.Set(66, 0);
+            _itemNameText.Top.Set(8, 0);
             panelTop.Append(_itemNameText);
 
-            // 中部面板：预设前缀按钮区域
+            _prefixText = new UIText("当前前缀: 无", 0.8f);
+            _prefixText.Left.Set(66, 0);
+            _prefixText.Top.Set(32, 0);
+            panelTop.Append(_prefixText);
+
+            // 中部面板：预设前缀按钮区域（可滚动、自动换行）
             var panelMiddle = new UIPanel();
             panelMiddle.Width.Set(0, 1f);
-            panelMiddle.Height.Set(-110, 1f); // 减去顶部和底部面板高度
-            panelMiddle.Top.Set(60, 0);
+            panelMiddle.Height.Set(-142, 1f); // 减去顶部、状态行和底部按钮的高度
+            panelMiddle.Top.Set(68, 0);
             panelMiddle.SetPadding(5);
             panelMiddle.OverflowHidden = true;
             Child.Append(panelMiddle);
 
-            _presetPanel = new UIPanel();
-            _presetPanel.Width.Set(0, 1f);
-            _presetPanel.Height.Set(0, 1f);
-            _presetPanel.SetPadding(5);
-            _presetPanel.BackgroundColor = Color.Transparent;
-            _presetPanel.BorderColor = Color.Transparent;
-            panelMiddle.Append(_presetPanel);
+            var presetTitle = new UIText("预设前缀 (点击应用到物品)", 0.8f);
+            presetTitle.Top.Set(2, 0);
+            presetTitle.HAlign = 0.5f;
+            panelMiddle.Append(presetTitle);
+
+            _presetScrollViewer = new UIScrollViewer();
+            _presetScrollViewer.Width.Set(0, 1f);
+            _presetScrollViewer.Height.Set(-22, 1f);
+            _presetScrollViewer.Top.Set(20, 0);
+            panelMiddle.Append(_presetScrollViewer);
 
             _presetWrapPanel = new UIWrapPanel();
             _presetWrapPanel.Width.Set(0, 1f);
-            _presetWrapPanel.Height.Set(0, 1f);
-            _presetWrapPanel.OverflowHidden = false;
-            _presetPanel.Append(_presetWrapPanel);
+            _presetWrapPanel.ItemMargin = 4;
+            _presetScrollViewer.SetChild(_presetWrapPanel);
 
-            // 底部面板：重置和随机重铸两个按钮
+            // 状态行
+            _statusText = new UIText("把背包中的物品放入左上角槽位", 0.8f);
+            _statusText.VAlign = 1f;
+            _statusText.Top.Set(-48, 0);
+            _statusText.HAlign = 0.5f;
+            Child.Append(_statusText);
+
+            // 底部面板：重置 / 随机重铸 / 完美重铸
             var panelBottom = new UIPanel();
             panelBottom.Width.Set(0, 1f);
-            panelBottom.Height.Set(50, 0);
+            panelBottom.Height.Set(44, 0);
             panelBottom.VAlign = 1f;
             panelBottom.SetPadding(5);
             Child.Append(panelBottom);
 
             _resetButton = new UIButton1("重置前缀");
-            _resetButton.Width.Set(80, 0);
-            _resetButton.Height.Set(30, 0);
-            _resetButton.HAlign = 0.3f;
+            _resetButton.Width.Set(-12, 1 / 3f);
+            _resetButton.Height.Set(32, 0);
+            _resetButton.HAlign = 0f;
             _resetButton.VAlign = 0.5f;
             _resetButton.OnLeftClick += (evt, element) => ResetPrefix();
             panelBottom.Append(_resetButton);
 
-            _reforgeButton = new UIButton1("随机重铸");
-            _reforgeButton.Width.Set(80, 0);
-            _reforgeButton.Height.Set(30, 0);
-            _reforgeButton.HAlign = 0.7f;
-            _reforgeButton.VAlign = 0.5f;
-            _reforgeButton.OnLeftClick += (evt, element) =>
-            {
-                if (_reforgeButtonEnabled)
-                    RandomReforge();
-            };
-            panelBottom.Append(_reforgeButton);
+            _randomButton = new UIButton1("随机重铸");
+            _randomButton.Width.Set(-12, 1 / 3f);
+            _randomButton.Height.Set(32, 0);
+            _randomButton.HAlign = 0.5f;
+            _randomButton.VAlign = 0.5f;
+            _randomButton.OnLeftClick += (evt, element) => RandomReforge();
+            panelBottom.Append(_randomButton);
+
+            _perfectButton = new UIButton1("完美重铸");
+            _perfectButton.Width.Set(-12, 1 / 3f);
+            _perfectButton.Height.Set(32, 0);
+            _perfectButton.HAlign = 1f;
+            _perfectButton.VAlign = 0.5f;
+            _perfectButton.OnLeftClick += (evt, element) => PerfectReforge();
+            panelBottom.Append(_perfectButton);
         }
 
         private void CreatePresetPanel()
         {
             foreach (int id in _presetPrefixIds)
-            {
-                string name = GetPrefixName(id);
-                var btn = new UIButton1(name);
-                btn.Width.Set(70, 0);
-                btn.Height.Set(30, 0);
-                btn.MarginLeft = 2;
-                btn.MarginRight = 2;
-                btn.MarginTop = 2;
-                btn.MarginBottom = 2;
-                btn.BackgroundColor = Color.DarkSlateBlue;
-                btn.TextColor = Color.White;
+                _presetWrapPanel.Append(CreatePresetButton(id));
 
-                int capturedId = id;
-                btn.OnLeftClick += (evt, element) => ApplyPreset(capturedId);
-                _presetWrapPanel.Append(btn);
-            }
+            _presetWrapPanel.UpdateContainer_Height();
+        }
+
+        private UIButton1 CreatePresetButton(int id)
+        {
+            string name = GetPrefixName(id);
+            var btn = new UIButton1(name);
+            btn.Width.Set(84, 0);
+            btn.Height.Set(28, 0);
+            btn.MarginLeft = 2;
+            btn.MarginRight = 2;
+            btn.MarginTop = 2;
+            btn.MarginBottom = 2;
+            btn.EnableColorBack = new Color(96, 66, 148) * 0.85f;
+            btn.MouseOverColorBack = new Color(120, 88, 174);
+            btn.OnUpdate += _ =>
+            {
+                if (btn.IsMouseHovering)
+                    Main.instance.MouseText($"应用前缀: {name}");
+            };
+
+            int capturedId = id;
+            btn.OnLeftClick += (evt, element) => ApplyPreset(capturedId);
+            return btn;
         }
 
         private string GetPrefixName(int prefixId)
         {
-            if (prefixId >= 0 && prefixId < Lang.prefix.Length && Lang.prefix[prefixId] != null)
+            if (prefixId <= 0) return "无";
+            if (prefixId < Lang.prefix.Length && Lang.prefix[prefixId] != null)
                 return Lang.prefix[prefixId].Value;
             return $"前缀 {prefixId}";
         }
@@ -148,20 +179,18 @@ namespace BetterPrefix
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            if (_reforgeCooldown > 0)
-            {
-                _reforgeCooldown--;
-                if (_reforgeCooldown <= 0)
-                {
-                    _reforgeButtonEnabled = true;
-                    _reforgeButton.BackgroundColor = Color.Gray;
-                }
-                else
-                {
-                    _reforgeButtonEnabled = false;
-                    _reforgeButton.BackgroundColor = Color.DarkGray;
-                }
-            }
+
+            // 预设按钮换行后容器高度跟随内容, 保证滚动条正确
+            _presetWrapPanel?.UpdateContainer_Height();
+
+            if (_reforgeCooldown > 0 && --_reforgeCooldown <= 0)
+                _perfectButton.isEnable = true;
+        }
+
+        private void SetStatus(string text, Color color)
+        {
+            _statusText.SetText(text);
+            _statusText.TextColor = color;
         }
 
         private void OnItemChanged(Item item)
@@ -177,12 +206,24 @@ namespace BetterPrefix
             {
                 _itemNameText.SetText("未选择物品");
                 _itemNameText.TextColor = Color.White;
+                _prefixText.SetText("当前前缀: 无");
+                _prefixText.TextColor = Color.Gray;
             }
             else
             {
-                string prefixName = _targetItem.prefix == 0 ? "" : Lang.prefix[_targetItem.prefix]?.Value + " ";
-                _itemNameText.SetText(prefixName + _targetItem.Name);
-                _itemNameText.TextColor = _isBest ? new Color(0xEE, 0x00, 0x00) : Color.White;
+                _itemNameText.SetText(_targetItem.Name);
+                _itemNameText.TextColor = _isBest ? new Color(0xEE, 0x60, 0x60) : Color.White;
+
+                if (_targetItem.prefix > 0 && _targetItem.prefix < Lang.prefix.Length && Lang.prefix[_targetItem.prefix] != null)
+                {
+                    _prefixText.SetText($"当前前缀: {Lang.prefix[_targetItem.prefix].Value}");
+                    _prefixText.TextColor = _isBest ? new Color(255, 215, 0) : new Color(255, 236, 170);
+                }
+                else
+                {
+                    _prefixText.SetText("当前前缀: 无");
+                    _prefixText.TextColor = Color.Gray;
+                }
             }
         }
 
@@ -192,12 +233,28 @@ namespace BetterPrefix
             Main.LocalPlayer.inventory[slot] = item.Clone();
         }
 
-        private void ResetPrefix()
+        private bool TryGetTargetSlot()
         {
-            if (_targetItem.IsAir) return;
+            if (_targetItem.IsAir)
+            {
+                SetStatus("请先放入物品", Color.OrangeRed);
+                return false;
+            }
 
             int slot = _itemSlot.SourceSlot;
-            if (slot == -1 || slot >= Main.LocalPlayer.inventory.Length) return;
+            if (slot == -1 || slot >= Main.LocalPlayer.inventory.Length)
+            {
+                SetStatus("找不到来源槽位", Color.OrangeRed);
+                return false;
+            }
+            return true;
+        }
+
+        private void ResetPrefix()
+        {
+            if (!TryGetTargetSlot()) return;
+
+            int slot = _itemSlot.SourceSlot;
 
             _targetItem.prefix = 0; // 移除前缀
 
@@ -205,37 +262,83 @@ namespace BetterPrefix
             _itemSlot.SetItem(_targetItem.Clone(), slot);
             _isBest = false;
             UpdateItemNameText();
-
-            /*Item newItem = new Item();
-            newItem.SetDefaults(_targetItem.type);
-            newItem.stack = _targetItem.stack;
-
-            WriteToInventorySlot(slot, newItem);
-            _itemSlot.SetItem(newItem.Clone(), slot);
-            _isBest = false;
-            UpdateItemNameText();*/
+            SetStatus("已移除前缀", Color.White);
         }
 
-        private void RandomReforge()
+        /// <summary>
+        /// 对目标物品做一次随机重铸
+        /// </summary>
+        private Item RollReforge(out bool topTier)
         {
-            if (_targetItem.IsAir) return;
+            Item tempItem = new Item();
+            tempItem.SetDefaults(_targetItem.type);
+            tempItem.stack = _targetItem.stack;
+
+            if (!tempItem.Prefix(-2, out topTier))
+                return null;
+            return tempItem;
+        }
+
+        /// <summary>
+        /// 把重铸结果写回物品槽, 并刷新显示与浮动文字
+        /// </summary>
+        private void ApplyReforgeResult(Item resultItem, bool gotBest, string statusText, Color statusColor)
+        {
+            resultItem.favorited = _targetItem.favorited;
 
             int slot = _itemSlot.SourceSlot;
-            if (slot == -1 || slot >= Main.LocalPlayer.inventory.Length) return;
+            WriteToInventorySlot(slot, resultItem);
+            _itemSlot.SetItem(resultItem.Clone(), slot);
+
+            _isBest = gotBest;
+            UpdateItemNameText();
+            SetStatus(statusText, statusColor);
+
+            Player player = Main.LocalPlayer;
+            Vector2 position = player.Center;
+            PopupText.NewText(gotBest ? PopupTextContext.ItemReforge_Best : PopupTextContext.ItemReforge, resultItem, position, resultItem.stack, noStack: true);
+        }
+
+        private void StartCooldown()
+        {
+            _reforgeCooldown = 60;
+            _perfectButton.isEnable = false;
+        }
+
+        /// <summary>
+        /// 随机重铸: 只重铸一次
+        /// </summary>
+        private void RandomReforge()
+        {
+            if (!TryGetTargetSlot()) return;
+
+            bool topTier;
+            Item finalItem = RollReforge(out topTier);
+            if (finalItem == null) return;
+
+            string prefixName = GetPrefixName(finalItem.prefix);
+            ApplyReforgeResult(finalItem, topTier,
+                topTier ? $"随机重铸: {prefixName} (完美!)" : $"随机重铸: {prefixName}",
+                Color.White);
+        }
+
+        /// <summary>
+        /// 完美重铸: 反复重铸, 直到获得完美前缀或达到最大尝试次数
+        /// </summary>
+        private void PerfectReforge()
+        {
+            if (!TryGetTargetSlot()) return;
 
             Item finalItem = null;
             bool gotBest = false;
-            bool originalFavorited = _targetItem.favorited;
+            int attempts = 0;
 
             for (int attempt = 0; attempt < _maxAttempts; attempt++)
             {
-                Item tempItem = new Item();
-                tempItem.SetDefaults(_targetItem.type);
-                tempItem.stack = _targetItem.stack;
-
+                attempts++;
                 bool topTier;
-                if (!tempItem.Prefix(-2, out topTier))
-                    return;
+                Item tempItem = RollReforge(out topTier);
+                if (tempItem == null) return;
 
                 finalItem = tempItem;
                 if (topTier)
@@ -247,45 +350,35 @@ namespace BetterPrefix
 
             if (finalItem == null) return;
 
-            finalItem.favorited = originalFavorited;
-
-            WriteToInventorySlot(slot, finalItem);
-            _itemSlot.SetItem(finalItem.Clone(), slot);
-            _isBest = gotBest;
-            UpdateItemNameText();
-
-            Player player = Main.LocalPlayer;
-            Vector2 position = player.Center;
-            PopupText.NewText(gotBest ? PopupTextContext.ItemReforge_Best : PopupTextContext.ItemReforge, finalItem, position, finalItem.stack, noStack: true);
-
+            string prefixName = GetPrefixName(finalItem.prefix);
             if (gotBest)
             {
-                _reforgeCooldown = 60;
-                _reforgeButtonEnabled = false;
-                _reforgeButton.BackgroundColor = Color.DarkGray;
+                ApplyReforgeResult(finalItem, true, $"完美重铸: 第 {attempts} 次获得完美 {prefixName}", new Color(255, 215, 0));
+                StartCooldown();
+            }
+            else
+            {
+                ApplyReforgeResult(finalItem, false, $"完美重铸: {attempts} 次未达完美, 当前 {prefixName}", Color.Gray);
             }
         }
 
+        /// <summary>
+        /// 预设前缀: 反复重铸, 直到获得目标前缀或达到最大尝试次数
+        /// </summary>
         private void ApplyPreset(int targetPrefixId)
         {
-            if (_targetItem.IsAir) return;
-
-            int slot = _itemSlot.SourceSlot;
-            if (slot == -1 || slot >= Main.LocalPlayer.inventory.Length) return;
+            if (!TryGetTargetSlot()) return;
 
             Item resultItem = null;
             bool gotBest = false;
-            bool originalFavorited = _targetItem.favorited;
+            int attempts = 0;
 
             for (int attempt = 0; attempt < _maxAttempts; attempt++)
             {
-                Item tempItem = new Item();
-                tempItem.SetDefaults(_targetItem.type);
-                tempItem.stack = _targetItem.stack;
-
+                attempts++;
                 bool topTier;
-                if (!tempItem.Prefix(-2, out topTier))
-                    return;
+                Item tempItem = RollReforge(out topTier);
+                if (tempItem == null) return;
 
                 if (tempItem.prefix == targetPrefixId)
                 {
@@ -295,26 +388,19 @@ namespace BetterPrefix
                 }
             }
 
+            string targetName = GetPrefixName(targetPrefixId);
             if (resultItem == null)
-                return; // 未获得目标前缀，静默失败
+            {
+                SetStatus($"未在 {_maxAttempts} 次内获得 [{targetName}], 已保留原前缀", Color.OrangeRed);
+                return;
+            }
 
-            resultItem.favorited = originalFavorited;
-
-            WriteToInventorySlot(slot, resultItem);
-            _itemSlot.SetItem(resultItem.Clone(), slot);
-            _isBest = gotBest;
-            UpdateItemNameText();
-
-            Player player = Main.LocalPlayer;
-            Vector2 position = player.Center;
-            PopupText.NewText(gotBest ? PopupTextContext.ItemReforge_Best : PopupTextContext.ItemReforge, resultItem, position, resultItem.stack, noStack: true);
+            ApplyReforgeResult(resultItem, gotBest,
+                gotBest ? $"已应用 [{targetName}] (完美! 第 {attempts} 次)" : $"已应用 [{targetName}] (第 {attempts} 次尝试)",
+                gotBest ? new Color(255, 215, 0) : Color.White);
 
             if (gotBest)
-            {
-                _reforgeCooldown = 60;
-                _reforgeButtonEnabled = false;
-                _reforgeButton.BackgroundColor = Color.DarkGray;
-            }
+                StartCooldown();
         }
 
         public override void OnDeactivate()
@@ -378,6 +464,9 @@ namespace BetterPrefix
                     Main.LocalPlayer.mouseInterface = true;
                     Item[] itemArray = new Item[] { _item };
                     ItemSlot.OverrideHover(itemArray, ItemSlot.Context.InventoryItem, 0);
+
+                    if (_item.IsAir)
+                        Main.instance.MouseText("放入背包中的物品");
 
                     if (Main.mouseLeft && Main.mouseLeftRelease)
                     {

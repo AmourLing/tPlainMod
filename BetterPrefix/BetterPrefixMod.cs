@@ -23,7 +23,7 @@ namespace BetterPrefix
         public override void Initialize()
         {
             if (Main.dedServ) return;
-            _ui = new UIBetterPrefix("前缀编辑器", 500, 400);
+            _ui = new UIBetterPrefix("前缀编辑器", 500, 430);
         }
 
         public override void UpdateUIStatesPostfix(GameTime gameTime)

@@ -1,8 +1,11 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using tContentPatch;
+using tContentPatch.Content.UI;
 using tContentPatch.Content.UI.ModSet;
 using Terraria;
+using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
 namespace BetterPrefix
@@ -46,6 +49,11 @@ namespace BetterPrefix
 
         public override UIElement GetUI()
         {
+            var stack = new UIStackPanel();
+            stack.Width.Set(0, 1f);
+            stack.ItemMargin = 4;
+            stack.IsAutoUpdateSize = true;
+
             var ui = new UIItemSwitch(
                 Main.Assets.Request<Texture2D>("Images/UI/ButtonPlay", ReLogic.Content.AssetRequestMode.ImmediateLoad).Value,
                 "添加到快捷按钮");
@@ -63,8 +71,14 @@ namespace BetterPrefix
             ui.OnUpdate += _ => { if (ui.IsMouseHovering) Main.instance.MouseText("需要 QuickButton 模组"); };
             _updateUI = ui.SetVal;
 
+            var hint = new UIText("开启后会在快捷按钮栏显示前缀编辑器的入口", 0.8f);
+            hint.TextColor = Color.Gray;
+
+            stack.Append(ui);
+            stack.Append(hint);
+
             _updateUI(_addToQuickButton);
-            return ui;
+            return stack;
         }
     }
 }

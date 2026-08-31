@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <dllDir>$(MSBuildThisFileDirectory)dll\</dllDir>
+    <modDir>D:\Steam\steamapps\common\Terraria\Mods\</modDir>
+  </PropertyGroup>
+</Project>
