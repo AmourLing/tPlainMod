@@ -39,9 +39,11 @@
 
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="AvailableBuffsSetting.cs" />
-        <Compile Include="BetterBuffGetMod.cs" />
-        <Compile Include="BuffSetting.cs" />
+    <Compile Include="AvailableBuffsSetting.cs" />
+    <Compile Include="BetterBuffGetMod.cs" />
+    <Compile Include="BuffDatabase.cs" />
+    <Compile Include="BuffSetting.cs" />
+    <Compile Include="PresetSetting.cs" />
         <Compile Include="KeyBindSetting.cs" />
         <Compile Include="ListenInput.cs" />
         <Compile Include="Setting.cs" />

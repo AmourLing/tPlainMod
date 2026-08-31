@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
-using QuickSetting; // 如果 ListenInput 在 QuickSetting 命名空间下
+using QuickSetting;
 using System;
+using System.Collections.Generic;
 using tContentPatch;
 using Terraria;
 using Terraria.ID;
-using System.Collections.Generic;
 using ReLogic.Content;
 
 namespace BetterBuffGet
@@ -16,6 +16,12 @@ namespace BetterBuffGet
         private static bool _keyPressed = false;
         private static bool _enabled = true;
         private static string _toggleKey = null;
+
+        /// <summary>是否自动持续获得增益 (每 10s 刷新一次), 默认关闭</summary>
+        public static bool AutoApply = false;
+        private static int _autoTimer = 0;
+        private const int AutoInterval = 600; // 10s @60fps
+        private const int AutoMinFrames = 720; // 补 buff 阈值: 剩余 <12s 才补 (留余量)
 
         public override void Initialize()
         {
@@ -28,6 +34,25 @@ namespace BetterBuffGet
         public override void UpdatePrefix(GameTime gameTime)
         {
             if (Main.gameMenu || Main.myPlayer == -1) return;
+
+            // 分帧扫描增益时长数据库, 完成前不提供快捷上增益
+            BuffDatabase.Update();
+            if (!BuffDatabase.Ready) return;
+
+            // 聊天输入/打开聊天时误触
+            if (Main.drawingPlayerChat) return;
+
+            // 自动持续获得: 每 10s 检查一次, 仅补剩余时间不足的增益
+            // (避免每次无脑重刷触发药水音效/副作用)
+            if (AutoApply && _enabled)
+            {
+                _autoTimer++;
+                if (_autoTimer >= AutoInterval)
+                {
+                    _autoTimer = 0;
+                    AutoTopUpBuffs();
+                }
+            }
 
             if (Main.keyState.IsKeyDown(Keys.B) && !_keyPressed)
             {
@@ -46,53 +71,63 @@ namespace BetterBuffGet
             Player player = Main.LocalPlayer;
             if (player == null || player.dead) return;
 
-            var selectedDict = BuffSetting.CurrentSelectedBuffs;
-            if (selectedDict == null) return;
+            var selected = BuffSetting.CurrentSelectedBuffs;
+            if (selected == null || selected.Count == 0) return;
 
-            foreach (var kv in selectedDict)
+            int applied = 0;
+            foreach (var kv in selected)
             {
                 if (!kv.Value) continue;
                 int buffId = kv.Key;
                 if (buffId > 0 && buffId < BuffID.Count)
                 {
-                    int duration = GetDefaultBuffDuration(buffId);
+                    // 最少 2 分钟 (7200 帧), 防止部分短时增益消失太快
+                    int duration = Math.Max(BuffDatabase.GetDuration(buffId), 7200);
                     player.AddBuff(buffId, duration);
+                    applied++;
                 }
             }
+
+            if (applied > 0 && !AutoApply)
+            { }
         }
 
-        private static Dictionary<int, int> _defaultBuffDurations;
-
-        private int GetDefaultBuffDuration(int buffId)
+        /// <summary>
+        /// 自动补续: 仅补剩余时间 <12s 的增益, 其余不重刷
+        /// </summary>
+        private void AutoTopUpBuffs()
         {
-            if (_defaultBuffDurations == null)
+            Player player = Main.LocalPlayer;
+            if (player == null || player.dead) return;
+
+            var selected = BuffSetting.CurrentSelectedBuffs;
+            if (selected == null || selected.Count == 0) return;
+
+            int added = 0;
+            int topped = 0;
+
+            foreach (var kv in selected)
             {
-                _defaultBuffDurations = new Dictionary<int, int>();
+                if (!kv.Value) continue;
+                int buffId = kv.Key;
+                if (buffId <= 0 || buffId >= BuffID.Count) continue;
 
-                for (int type = 1; type < ItemID.Count; type++)
+                int dur = Math.Max(BuffDatabase.GetDuration(buffId), 7200);
+                int idx = player.FindBuffIndex(buffId);
+                if (idx < 0)
                 {
-                    Item item = new Item();
-                    item.SetDefaults(type);
-
-                    if (item.buffType > 0 && item.buffTime > 0)
-                    {
-                        int id = item.buffType;
-                        int time = item.buffTime;
-                        if (!_defaultBuffDurations.ContainsKey(id))
-                            _defaultBuffDurations[id] = time;
-                        else if (time > _defaultBuffDurations[id])
-                            _defaultBuffDurations[id] = time;
-                    }
+                    player.AddBuff(buffId, dur);
+                    added++;
+                }
+                else if (player.buffTime[idx] < AutoMinFrames)
+                {
+                    player.buffTime[idx] = dur;
+                    topped++;
                 }
             }
 
-            if (_defaultBuffDurations.TryGetValue(buffId, out int duration))
-                return duration;
-
-            if (Main.debuff[buffId])
-                return 60;
-            else
-                return 300;
+            if (added > 0 || topped > 0)
+            { }
         }
 
         public static void SetToggleKey(string key)
