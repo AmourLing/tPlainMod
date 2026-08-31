@@ -1,0 +1,7 @@
+{
+  "key": "BetterInfoDisplay",
+  "version": "1.0.0",
+  "isEnable": true,
+  "dllPath": "BetterInfoDisplay.dll",
+  "frontModKeys": null
+}

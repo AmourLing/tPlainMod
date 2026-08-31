@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.9.12120.119
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterZoom", "BetterZoom\BetterZoom.csproj", "{B8C3D2E1-F4A5-4B6C-8D7E-9F0A1B2C3D4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterAchievementUnlocker", "BetterAchievementUnlocker\BetterAchievementUnlocker.csproj", "{A1B2C3D4-E5F6-7890-AB12-CD34EF567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterBuffGet", "BetterBuffGet\BetterBuffGet.csproj", "{F2AD7A3A-9748-7704-A859-F176120B6B70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterFishing", "BetterFishing\BetterFishing.csproj", "{B5F3E8A2-4C6D-4F8E-9A7B-2C5E7D9F1A4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterInfoDisplay", "BetterInfoDisplay\BetterInfoDisplay.csproj", "{6B3D8E2F-9A4C-4F1E-9D8B-3C5A7E9F1B2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterPrefix", "BetterPrefix\BetterPrefix.csproj", "{5FA4FBA2-4F58-4558-9441-E0CF8131446F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8C3D2E1-F4A5-4B6C-8D7E-9F0A1B2C3D4E}.Release|x86.ActiveCfg = Release|x86
+		{B8C3D2E1-F4A5-4B6C-8D7E-9F0A1B2C3D4E}.Release|x86.Build.0 = Release|x86
+		{A1B2C3D4-E5F6-7890-AB12-CD34EF567890}.Release|x86.ActiveCfg = Release|x86
+		{A1B2C3D4-E5F6-7890-AB12-CD34EF567890}.Release|x86.Build.0 = Release|x86
+		{F2AD7A3A-9748-7704-A859-F176120B6B70}.Release|x86.ActiveCfg = Release|x86
+		{F2AD7A3A-9748-7704-A859-F176120B6B70}.Release|x86.Build.0 = Release|x86
+		{B5F3E8A2-4C6D-4F8E-9A7B-2C5E7D9F1A4C}.Release|x86.ActiveCfg = Release|x86
+		{B5F3E8A2-4C6D-4F8E-9A7B-2C5E7D9F1A4C}.Release|x86.Build.0 = Release|x86
+		{6B3D8E2F-9A4C-4F1E-9D8B-3C5A7E9F1B2D}.Release|x86.ActiveCfg = Release|x86
+		{6B3D8E2F-9A4C-4F1E-9D8B-3C5A7E9F1B2D}.Release|x86.Build.0 = Release|x86
+		{5FA4FBA2-4F58-4558-9441-E0CF8131446F}.Release|x86.ActiveCfg = Release|x86
+		{5FA4FBA2-4F58-4558-9441-E0CF8131446F}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2DFBAD86-EB2B-4DD8-A6E8-5C9AF31DE867}
+	EndGlobalSection
+EndGlobal

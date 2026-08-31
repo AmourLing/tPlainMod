@@ -1,0 +1,7 @@
+{
+  "key": "BetterBuffGet",
+  "version": "1.0.0",
+  "isEnable": true,
+  "dllPath": "BetterBuffGet.dll",
+  "frontModKeys": null
+}

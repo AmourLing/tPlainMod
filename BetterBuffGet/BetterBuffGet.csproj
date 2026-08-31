@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{F2AD7A3A-9748-7704-A859-F176120B6B70}</ProjectGuid>
+        <OutputType>Library</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>BetterBuffGet</RootNamespace>
+        <AssemblyName>BetterBuffGet</AssemblyName>
+        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+        <OutputPath>..\..\..\..\..\GOG Games\Terraria\Mods\BetterBuffGet\</OutputPath>
+        <Optimize>true</Optimize>
+        <PlatformTarget>x86</PlatformTarget>
+        <LangVersion>7.3</LangVersion>
+        <ErrorReport>prompt</ErrorReport>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
+        <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
+        <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
+        <Reference Include="ReLogic">
+            <HintPath>..\..\dll\ReLogic.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Xml.Linq" />
+        <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="Microsoft.CSharp" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Net.Http" />
+        <Reference Include="System.Xml" />
+        <Reference Include="tContentPatch">
+            <HintPath>..\..\tPlainModLoader\tPlainModLoader\bin\Debug\tContentPatch.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Terraria_v1.4.5.6">
+            <HintPath>..\..\dll\Terraria_v1.4.5.6.exe</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="QuickSetting">
+            <HintPath>..\..\..\..\..\GOG Games\Terraria\Mods\QuickSetting\QuickSetting.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="AvailableBuffsSetting.cs" />
+        <Compile Include="BetterBuffGetMod.cs" />
+        <Compile Include="BuffSetting.cs" />
+        <Compile Include="KeyBindSetting.cs" />
+        <Compile Include="ListenInput.cs" />
+        <Compile Include="Setting.cs" />
+        <Compile Include="UIBuffList.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="Resource\info.json" />
+        <None Include="Resource\loadConfig.json" />
+        <Content Include="Resource\ico.png" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

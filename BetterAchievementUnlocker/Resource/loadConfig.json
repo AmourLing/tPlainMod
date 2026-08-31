@@ -1,0 +1,7 @@
+{
+  "key": "BetterAchievementUnlocker",
+  "version": "1.0.0",
+  "isEnable": true,
+  "dllPath": "BetterAchievementUnlocker.dll",
+  "frontModKeys": null
+}

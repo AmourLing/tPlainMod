@@ -1,0 +1,7 @@
+{
+  "key": "BetterPrefix",
+  "version": "1.0.0",
+  "isEnable": true,
+  "dllPath": "BetterPrefix.dll",
+  "frontModKeys": null
+}
