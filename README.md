@@ -1,6 +1,6 @@
 # tPlainMod
 
-基于 [tPlainModLoader](https://github.com/AmourLing/tPlainModLoader) 的 Terraria (1.4.4) 功能模组合集。
+基于 [tPlainModLoader](https://github.com/github-user-64/tPlainModLoader) 的 Terraria (1.4.5) 功能模组合集。
 
 ## 模组列表
 
@@ -13,9 +13,9 @@
 
 ## 依赖
 
-- [tPlainModLoader](https://github.com/AmourLing/tPlainModLoader)（含 tContentPatch 公共库）
-- [QuickSetting](https://github.com/AmourLing/tPlainModLoader)（可选, 提供设置面板与页面）
-- [QuickButton](https://github.com/AmourLing/tPlainModLoader)（可选, 提供快捷按钮栏）
+- [tPlainModLoader](https://github.com/github-user-64/tPlainModLoader)（含 tContentPatch 公共库，使用 1.4.5 分支）
+- [QuickSetting](https://github.com/github-user-64/tPlainModLoader)（可选, 提供设置面板与页面）
+- [QuickButton](https://github.com/github-user-64/tPlainModLoader)（可选, 提供快捷按钮栏）
 
 ## 构建
 
