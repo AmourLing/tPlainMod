@@ -1,279 +1,137 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using tContentPatch.Content.UI;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
-using Terraria.UI;
 
 namespace BetterInfoDisplay
 {
-    internal class UIInfoDisplay : UIElement
+    /// <summary>
+    /// 角色信息主页: 基础 / 移动 / 永久增益 / 功能开关 / 快捷操作
+    /// (伤害类属性在「伤害详情」页)
+    /// </summary>
+    internal class UIInfoDisplay : InfoPageBase
     {
-        private UIPanel _mainPanel;
-        private UIScrollViewer _scrollViewer;
-        private UIStackPanel _stackPanel;
-        private Dictionary<string, EditableProperty> _editableProps;
-        private UIText _readOnlyText;
-        private static Texture2D _whitePixel;
-
-        public UIInfoDisplay()
+        protected override void Build()
         {
-            Width.Set(0, 1f);
-            Height.Set(500, 0);
+            // ===== 基础 =====
+            Section("【基础】");
+            Line("生命", p => $"{p.statLife} / {p.statLifeMax2}",
+                p => p.statLife >= p.statLifeMax2 ? Color.LightGreen : Color.White);
+            Line("魔力", p => $"{p.statMana} / {p.statManaMax2}",
+                p => p.statMana >= p.statManaMax2 ? Color.LightGreen : Color.White);
+            Line("防御", p => $"{p.statDefense}");
+            Line("幸运", p => $"{p.luck:F2}");
+            Line("生命再生", p => $"{p.lifeRegen}");
+            Line("无敌帧", p => $"{p.immuneTime}帧",
+                p => p.immuneTime > 0 ? Color.Orange : Color.White);
 
-            _mainPanel = new UIPanel();
-            _mainPanel.Width.Set(0, 1f);
-            _mainPanel.Height.Set(0, 1f);
-            _mainPanel.SetPadding(10);
-            Append(_mainPanel);
+            // ===== 移动 =====
+            Section("【移动】");
+            Line("移动速度", p => $"{p.moveSpeed:F0}%");
+            Line("飞行时间", p => $"{p.wingTime:F0} / {p.wingTimeMax:F0}",
+                p => p.wingTimeMax > 0 && p.wingTime >= p.wingTimeMax ? Color.LightGreen : Color.White);
+            Line("重力", p => p.gravDir == -1 ? "反转" : "正常",
+                p => p.gravDir == -1 ? Color.Yellow : Color.White);
 
-            _scrollViewer = new UIScrollViewer();
-            _scrollViewer.Width.Set(0, 1f);
-            _scrollViewer.Height.Set(0, 1f);
-            _mainPanel.Append(_scrollViewer);
+            // ===== 永久增益 =====
+            Section("【永久增益】");
+            PermLine("工匠面包", p => p.ateArtisanBread);
+            PermLine("活力水晶", p => p.usedAegisCrystal);
+            PermLine("神盾果", p => p.usedAegisFruit);
+            PermLine("奥术水晶", p => p.usedArcaneCrystal);
+            PermLine("仙馔密酒", p => p.usedAmbrosia);
+            PermLine("粘性蠕虫", p => p.usedGummyWorm);
+            PermLine("星系珍珠", p => p.usedGalaxyPearl);
 
-            _stackPanel = new UIStackPanel();
-            _stackPanel.Width.Set(0, 1f);
-            _stackPanel.Horizontal = false;
-            _stackPanel.ItemMargin = 8;
-            _stackPanel.SetPadding(5);
-            _stackPanel.IsAutoUpdateSize = true;
-            _scrollViewer.SetChild(_stackPanel);
+            // ===== 功能开关 =====
+            Section("【功能开关】");
+            BoolToggle("无限飞行", () => BetterInfoDisplayMod.InfiniteFlight, v => BetterInfoDisplayMod.InfiniteFlight = v,
+                "翅膀飞行时间每帧回满");
+            BoolToggle("无限魔力", () => BetterInfoDisplayMod.InfiniteMana, v => BetterInfoDisplayMod.InfiniteMana = v,
+                "魔力每帧回满, 施法无消耗");
+            BoolToggle("生命锁定", () => BetterInfoDisplayMod.LockLife, v => BetterInfoDisplayMod.LockLife = v,
+                "生命每帧回满 (不免疫即死机制)");
+            BoolToggle("无限呼吸", () => BetterInfoDisplayMod.InfiniteBreath, v => BetterInfoDisplayMod.InfiniteBreath = v,
+                "氧气每帧回满, 水下不溺");
+            BoolToggle("摔落免疫", () => BetterInfoDisplayMod.NoFallDamage, v => BetterInfoDisplayMod.NoFallDamage = v,
+                "免疫摔落伤害");
 
-            if (_whitePixel == null)
+            // ===== 快捷操作 =====
+            Section("【快捷操作】");
+            var actionRow = new UIStackPanel();
+            actionRow.Horizontal = true;
+            actionRow.Width.Set(0, 1f);
+            actionRow.Height.Set(30, 0);
+            actionRow.ItemMargin = 6;
+            Stack.Append(actionRow);
+
+            var flipBtn = new UIButton1("反转重力", 0.8f);
+            flipBtn.Width.Set(-6, 0.5f);
+            flipBtn.Height.Set(26, 0);
+            flipBtn.OnLeftClick += (evt, el) =>
             {
-                _whitePixel = new Texture2D(Main.graphics.GraphicsDevice, 1, 1);
-                _whitePixel.SetData(new[] { Color.White });
-            }
-
-            _editableProps = new Dictionary<string, EditableProperty>
-            {
-                ["无限飞行"] = new EditableProperty(
-                    getter: () => BetterInfoDisplayMod.InfiniteFlightEnabled,
-                    setter: (val) => BetterInfoDisplayMod.InfiniteFlightEnabled = (bool)val,
-                    type: typeof(bool)
-                )
+                Player p = Main.LocalPlayer;
+                if (p != null && p.active) p.gravDir = -p.gravDir;
             };
+            actionRow.Append(flipBtn);
 
-            BuildUI();
-        }
+            var clearBtn = new UIButton1("清除减益", 0.8f);
+            clearBtn.Width.Set(-6, 0.5f);
+            clearBtn.Height.Set(26, 0);
+            clearBtn.OnLeftClick += (evt, el) => ClearDebuffs();
+            actionRow.Append(clearBtn);
 
-        private void BuildUI()
-        {
-            _stackPanel.RemoveAllChildren();
-
-            var readOnlyTitle = new UIText("【只读信息】", 1.2f);
-            readOnlyTitle.TextColor = Color.Gold;
-            _stackPanel.Append(readOnlyTitle);
-
-            _readOnlyText = new UIText("");
-            _readOnlyText.IsWrapped = true;
-            _readOnlyText.Width.Set(0, 1f);
-            _stackPanel.Append(_readOnlyText);
-
-            var separator = new UIHorizontalSeparator(_whitePixel);
-            separator.Height.Set(2, 0);
-            _stackPanel.Append(separator);
-
-            var editTitle = new UIText("【可编辑属性】", 1.2f);
-            editTitle.TextColor = Color.Gold;
-            _stackPanel.Append(editTitle);
-
-            foreach (var kv in _editableProps)
-            {
-                var propPanel = new UIStackPanel();
-                propPanel.Horizontal = true;
-                propPanel.Width.Set(0, 1f);
-                propPanel.Height.Set(30, 0);
-                propPanel.ItemMargin = 10;
-                _stackPanel.Append(propPanel);
-
-                var label = new UIText(kv.Key);
-                label.Width.Set(120, 0);
-                label.VAlign = 0.5f;
-                propPanel.Append(label);
-
-                UIElement control = null;
-                if (kv.Value.Type == typeof(bool))
-                {
-                    var btn = new UIButton1(kv.Value.GetValue<bool>() ? "开启" : "关闭");
-                    btn.Width.Set(80, 0);
-                    btn.Height.Set(24, 0);
-                    btn.VAlign = 0.5f;
-                    btn.OnLeftClick += (evt, el) =>
-                    {
-                        bool newVal = !kv.Value.GetValue<bool>();
-                        kv.Value.SetValue(newVal);
-                        btn.SetText(newVal ? "开启" : "关闭");
-                    };
-                    control = btn;
-                }
-                else
-                {
-                    var textBox = new UITextBox("");
-                    textBox.Width.Set(100, 0);
-                    textBox.Height.Set(24, 0);
-                    textBox.VAlign = 0.5f;
-                    textBox.OnTextChanged += (text) =>
-                    {
-                        if (kv.Value.Type == typeof(int))
-                        {
-                            if (int.TryParse(text, out int val))
-                            {
-                                val = Clamp(val, (int)kv.Value.Min, (int)kv.Value.Max);
-                                kv.Value.SetValue(val);
-                                textBox.SetText(val.ToString());
-                            }
-                            else
-                            {
-                                textBox.SetText(kv.Value.GetValue<int>().ToString());
-                            }
-                        }
-                        else if (kv.Value.Type == typeof(float))
-                        {
-                            if (float.TryParse(text, out float val))
-                            {
-                                val = Clamp(val, kv.Value.Min, kv.Value.Max);
-                                kv.Value.SetValue(val);
-                                textBox.SetText(val.ToString(kv.Value.Format));
-                            }
-                            else
-                            {
-                                textBox.SetText(kv.Value.GetValue<float>().ToString(kv.Value.Format));
-                            }
-                        }
-                    };
-                    if (kv.Value.Type == typeof(int))
-                        textBox.SetText(kv.Value.GetValue<int>().ToString());
-                    else
-                        textBox.SetText(kv.Value.GetValue<float>().ToString(kv.Value.Format));
-                    control = textBox;
-                }
-                propPanel.Append(control);
-            }
-
-            var hint = new UIText("提示：修改后实时生效，关闭界面不会重置", 0.8f);
+            var hint = new UIText("开关实时生效, 重启游戏后重置为关", 0.8f);
             hint.TextColor = Color.Gray;
-            _stackPanel.Append(hint);
+            Stack.Append(hint);
         }
 
-        public override void Update(GameTime gameTime)
+        private void BoolToggle(string label, Func<bool> get, Action<bool> set, string hint)
         {
-            base.Update(gameTime);
-            UpdateReadOnlyInfo();
+            var row = new UIStackPanel();
+            row.Horizontal = true;
+            row.Width.Set(0, 1f);
+            row.Height.Set(28, 0);
+            row.ItemMargin = 6;
+            Stack.Append(row);
+
+            var name = new UIText(label, 0.85f);
+            name.VAlign = 0.5f;
+            row.Append(name);
+
+            var btn = new UIButton1(get() ? "开" : "关", 0.85f);
+            btn.Width.Set(56, 0);
+            btn.Height.Set(22, 0);
+            btn.HAlign = 1f;
+            btn.VAlign = 0.5f;
+            btn.TextColor = get() ? Color.LightGreen : new Color(200, 120, 120);
+            btn.OnLeftClick += (evt, el) =>
+            {
+                bool nv = !get();
+                set(nv);
+                btn.SetText(nv ? "开" : "关");
+                btn.TextColor = nv ? Color.LightGreen : new Color(200, 120, 120);
+            };
+            btn.OnUpdate += _ =>
+            {
+                if (btn.IsMouseHovering && hint.Length > 0)
+                    Main.instance.MouseText(hint);
+            };
+            row.Append(btn);
         }
 
-        private string _lastReadOnlyText = "";
-
-        private void UpdateReadOnlyInfo()
+        private void ClearDebuffs()
         {
             Player p = Main.LocalPlayer;
-            if (p == null || !p.active)
+            if (p == null || !p.active) return;
+
+            for (int i = p.buffType.Length - 1; i >= 0; i--)
             {
-                if (_lastReadOnlyText != "未找到玩家")
-                {
-                    _readOnlyText?.SetText("未找到玩家");
-                    _lastReadOnlyText = "未找到玩家";
-                    RefreshLayout();
-                }
-                return;
+                int t = p.buffType[i];
+                if (t > 0 && Main.debuff[t])
+                    p.DelBuff(i);
             }
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"生命: {p.statLife} / {p.statLifeMax2}");
-            sb.AppendLine($"魔力: {p.statMana} / {p.statManaMax2}");
-            sb.AppendLine($"防御: {p.statDefense}");
-            sb.AppendLine($"近战伤害加成: {((p.meleeDamage - 1) * 100):F1}%");
-            sb.AppendLine($"近战暴击率: {p.meleeCrit}%");
-            sb.AppendLine($"魔法伤害加成: {((p.magicDamage - 1) * 100):F1}%");
-            sb.AppendLine($"魔法暴击率: {p.magicCrit}%");
-            sb.AppendLine($"远程伤害加成: {((p.rangedDamage - 1) * 100):F1}%");
-            sb.AppendLine($"箭矢伤害加成: {((p.arrowDamage - 1) * 100):F1}%");
-            sb.AppendLine($"子弹伤害加成: {((p.bulletDamage - 1) * 100):F1}%");
-            sb.AppendLine($"远程暴击率: {p.rangedCrit}%");
-            sb.AppendLine($"召唤伤害加成: {((p.minionDamage - 1) * 100):F1}%");
-            sb.AppendLine($"仆从栏: {p.slotsMinions} / {p.maxMinions}");
-            //sb.AppendLine($"哨兵栏: {p.numTurrets} / {p.maxTurrets}"); //Player中numTurrets不存在
-            sb.AppendLine($"哨兵栏:  / {p.maxTurrets}");
-            sb.AppendLine($"翅膀飞行时间: {p.wingTime} / {p.wingTimeMax}");
-            sb.AppendLine($"重力反转: {(p.gravDir == -1 ? "是" : "否")}");
-            sb.AppendLine($"无敌帧剩余: {p.immuneTime}");
-            sb.AppendLine($"幸运: {p.luck}");
-            sb.AppendLine($"伤害减免: {p.endurance * 100}%");
-            sb.AppendLine($"生命再生: {p.lifeRegen}");
-            sb.AppendLine($"移动速度: {p.moveSpeed * 100}%");
-            sb.AppendLine($"永久增益(工匠面包): {(p.ateArtisanBread ? "✓" : "✗")}");
-            sb.AppendLine($"永久增益(活力水晶): {(p.usedAegisCrystal ? "✓" : "✗")}");
-            sb.AppendLine($"永久增益(神盾果): {(p.usedAegisFruit ? "✓" : "✗")}");
-            sb.AppendLine($"永久增益(奥术水晶): {(p.usedArcaneCrystal ? "✓" : "✗")}");
-            sb.AppendLine($"永久增益(仙馔密酒): {(p.usedAmbrosia ? "✓" : "✗")}");
-            sb.AppendLine($"永久增益(粘性蠕虫): {(p.usedGummyWorm ? "✓" : "✗")}");
-            sb.AppendLine($"永久增益(星系珍珠): {(p.usedGalaxyPearl ? "✓" : "✗")}");
-
-            string newText = sb.ToString();
-            if (_lastReadOnlyText != newText)
-            {
-                _readOnlyText?.SetText(newText);
-                _lastReadOnlyText = newText;
-                RefreshLayout();
-            }
-        }
-
-        private void RefreshLayout()
-        {
-            _stackPanel.Recalculate();
-            _scrollViewer.Recalculate();
-        }
-
-        private class EditableProperty
-        {
-            public Func<object> Getter { get; }
-            public Action<object> Setter { get; }
-            public Type Type { get; }
-            public float Min { get; }
-            public float Max { get; }
-            public string Format { get; }
-
-            public EditableProperty(Func<object> getter, Action<object> setter, Type type, float min = 0, float max = 1, string format = null)
-            {
-                Getter = getter;
-                Setter = setter;
-                Type = type;
-                Min = min;
-                Max = max;
-                Format = format ?? (type == typeof(float) ? "F2" : "");
-            }
-
-            public T GetValue<T>() => (T)Getter();
-
-            public void SetValue(object val) => Setter(val);
-        }
-
-        private class UIHorizontalSeparator : UIElement
-        {
-            private Texture2D _pixel;
-
-            public UIHorizontalSeparator(Texture2D pixel)
-            {
-                _pixel = pixel;
-                Width.Set(0, 1f);
-            }
-
-            protected override void DrawSelf(SpriteBatch spriteBatch)
-            {
-                var dim = GetDimensions();
-                spriteBatch.Draw(_pixel, new Rectangle((int)dim.X, (int)(dim.Y + dim.Height / 2), (int)dim.Width, 2), Color.Gray);
-            }
-        }
-
-        private static T Clamp<T>(T value, T min, T max) where T : IComparable<T>
-        {
-            if (value.CompareTo(min) < 0) return min;
-            if (value.CompareTo(max) > 0) return max;
-            return value;
         }
     }
 }

@@ -40,7 +40,11 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="BetterInfoDisplayMod.cs" />
+        <Compile Include="InfoPageBase.cs" />
         <Compile Include="UIInfoDisplay.cs" />
+        <Compile Include="UIDamageStats.cs" />
+        <Compile Include="Setting.cs" />
+        <Compile Include="ModQuickButton.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>

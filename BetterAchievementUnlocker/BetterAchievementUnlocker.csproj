@@ -39,6 +39,8 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="BetterAchievementUnlockerMod.cs" />
+        <Compile Include="AchievementUnlocker.cs" />
+        <Compile Include="AchievementSetting.cs" />
         <Compile Include="UIAchievementUnlocker.cs" />
         <Compile Include="Setting.cs" />
         <Compile Include="ModQuickButton.cs" />
