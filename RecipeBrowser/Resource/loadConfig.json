@@ -1,0 +1,7 @@
+{
+  "key": "RecipeBrowser",
+  "version": "1.0.0",
+  "isEnable": true,
+  "dllPath": "RecipeBrowser.dll",
+  "frontModKeys": null
+}

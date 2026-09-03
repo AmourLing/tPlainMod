@@ -1,0 +1,6 @@
+{
+  "name": "配方浏览器",
+  "author": "AmourLing",
+  "jumpPath": "https://github.com/AmourLing/tPlainMod",
+  "description": "浏览全部物品, 查询合成配方与材料用途, 显示站点与可合成状态。设计参考 RecipeBrowser (MIT)。"
+}
